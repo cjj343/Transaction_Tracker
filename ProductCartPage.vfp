@@ -1,5 +1,10 @@
 <apex:page controller="ProductCartController">
+   <!--
+   http://www.sfdcpoint.com/salesforce/wrapper-class-in-apex/
+   credit to Ankush Dureja for the JS function
+   implements the check all feature
    <script type="text/javascript">
+   -->
         function selectAllCheckboxes(obj,receivedInputID){
             var inputCheckBox = document.getElementsByTagName("input");                  
             for(var i=0; i<inputCheckBox.length; i++){          
