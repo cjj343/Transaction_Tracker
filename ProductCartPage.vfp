@@ -1,0 +1,54 @@
+<apex:page controller="ProductCartController">
+   <script type="text/javascript">
+        function selectAllCheckboxes(obj,receivedInputID){
+            var inputCheckBox = document.getElementsByTagName("input");                  
+            for(var i=0; i<inputCheckBox.length; i++){          
+                if(inputCheckBox[i].id.indexOf(receivedInputID)!=-1){                                     
+                    inputCheckBox[i].checked = obj.checked;
+                }
+            }
+        }
+    </script>
+    <apex:form >
+        <apex:pageBlock >
+            <apex:pageBlockTable value="{!productWrapperList}" var="item" id="products">
+                <apex:facet name="header">Product List</apex:facet>
+                <apex:column >
+                    <apex:facet name="header">
+                        <apex:inputCheckbox onclick="selectAllCheckboxes(this,'inputId')"/>
+                    </apex:facet>
+                    <apex:inputCheckbox value="{!item.status}" id="inputId"/>
+                </apex:column>
+                <apex:column value="{!item.prod.Product_Name__c}" headerValue="Product Name"/>
+                <apex:column value="{!item.prod.Product_Manufacturer__c}" headerValue="Manufacturer"/>
+                <apex:column value="{!item.prod.Description__c}" headerValue="Description"/>
+                <apex:column value="{!item.prod.Unit_Price__c}" headerValue="Unit Price"/>
+            </apex:pageBlockTable>
+            <apex:commandButton value="Add Item(s)" action="{!processSelected}" />
+        </apex:pageBlock>
+        <apex:pageBlock >
+            <apex:pageBlockTable value="{!cartList}" var="p">
+                <apex:facet name="header">Cart</apex:facet>
+                <apex:column >
+                    <apex:facet name="header">
+                        <apex:inputCheckbox onclick="selectAllCheckboxes(this,'inputId')"/>
+                    </apex:facet>
+                    <apex:inputCheckbox value="{!p.remove}" id="inputId"/>
+                </apex:column>
+                <apex:column value="{!p.prod.Product_Name__c}" headerValue="Product Name"/>
+                <apex:column value="{!p.prod.Product_Manufacturer__c}" headerValue="Manufacturer"/>
+                <apex:column value="{!p.prod.Description__c}" headerValue="Description"/>
+                <apex:column value="{!p.prod.Unit_Price__c}" headerValue="Unit Price"/>
+                <apex:column value="{!p.Quantity}" headerValue="Quantity"/>
+                <apex:column value="{!p.total}" headerValue="Total"/> 
+            </apex:pageBlockTable>
+            <apex:commandButton value="Remove Selected" action="{!updateCart}" />
+            <apex:commandButton value="Check Out" action="{!checkOut}" />
+        </apex:pageBlock>
+        <apex:pageBlock >
+            <div align = "right">
+                <apex:outputText > Cart Total: {!cartTotal} </apex:outputText>     
+            </div>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>
