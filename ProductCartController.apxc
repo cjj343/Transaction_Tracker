@@ -1,0 +1,102 @@
+public class ProductCartController {
+    public List<productWrapper> productWrapperList {get; set;}
+    public List<productWrapper> cartList {get; set;}
+    public Decimal cartTotal {get; set;}
+    List<productWrapper> selectedProducts = new List<productWrapper>();
+   
+
+    public ProductCartController(){
+        cartTotal = 0;
+        
+        if(productWrapperList == null) {
+            productWrapperList = new List<productWrapper>();
+            for(Product__c p: [SELECT Product_Name__c, Product_Manufacturer__c, Description__c, Unit_Price__c FROM Product__c]) {
+                productWrapperList.add(new productWrapper(p, 0));
+            }
+        }
+    }
+    
+    public void processSelected() { 
+        cartList = new List<productWrapper>();
+        cartTotal = 0;
+        
+        for(productWrapper wrapObj : productWrapperList) {
+            if(wrapObj.status == true) {
+                if(selectedProducts.contains(wrapObj)){
+                    selectedProducts[selectedProducts.indexOf(wrapObj)].Quantity++;
+                    selectedProducts[selectedProducts.indexOf(wrapObj)].total = selectedProducts[selectedProducts.indexOf(wrapObj)].Quantity * selectedProducts[selectedProducts.indexOf(wrapObj)].prod.unit_price__c;
+                    selectedProducts[selectedProducts.indexOf(wrapObj)].Status = true;
+                }
+                else{
+                    selectedProducts.add(wrapObj);
+                    selectedProducts[selectedProducts.indexOf(wrapObj)].Status = true;
+                    selectedProducts[selectedProducts.indexOf(wrapObj)].Quantity++;
+                    selectedProducts[selectedProducts.indexOf(wrapObj)].total = selectedProducts[selectedProducts.indexOf(wrapObj)].Quantity * selectedProducts[selectedProducts.indexOf(wrapObj)].prod.unit_price__c;
+                }
+            }
+        }
+        
+        for(productWrapper cartItem : selectedProducts){
+            cartTotal += cartItem.total;
+            cartList.add(cartItem);
+        }
+        
+
+    }
+    
+    public void updateCart(){
+        for(productWrapper wrapObj : cartList) {
+            if(wrapObj.remove == true) {
+                    wrapObj.remove = false;
+                    wrapObj.status = false;
+                    wrapObj.Quantity = 0;
+                    wrapObj.total = 0;
+                    selectedProducts.remove(selectedProducts.indexOf(wrapObj));
+            }
+        }
+        
+        cartList = new List<productWrapper>();
+        cartTotal = 0;
+        for(productWrapper cartItem : selectedProducts){
+            cartTotal += cartItem.total;
+            cartList.add(cartItem);
+        }
+    }
+    
+    public void checkOut(){
+                Transaction__c trans = new Transaction__c(Name = 'testtransfromVF1');
+        insert trans;
+        ID transID = trans.Id;
+        List<Product_Order__c> prods = new List<Product_Order__c>();
+        
+        for(productWrapper i : selectedProducts){
+            prods.add(new Product_Order__c(Transaction__c = transID, Product__c = i.prod.Id, Quantity__c = i.Quantity));
+        }
+        
+        cartTotal = 0;
+        selectedProducts.clear();
+        cartList.clear();
+        
+        insert prods;
+        update trans;
+    }
+
+    
+    public class productWrapper {
+        public Product__c prod { get; set; }
+        public Integer quantity { get; set; }
+        public Boolean status { get; set; }
+        public Boolean remove { get; set; }
+        public Decimal total { get; set; }
+        
+        
+        public productWrapper(Product__c p, Integer q){
+            prod = p;
+            quantity = q;
+            status = false;
+            remove = false;
+            total = 0;
+ 
+        }
+    }
+}
